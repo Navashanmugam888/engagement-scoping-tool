@@ -1,9 +1,13 @@
-import json
-from backend.core.scope_processor import ScopeDefinitionProcessor
-from backend.core.effort_calculator import EffortCalculator
-from backend.data.effort_template import EFFORT_ESTIMATION_TEMPLATE
+#!/usr/bin/env python
+"""
+Test with image data without unicode output
+"""
+import sys
+sys.path.insert(0, '.')
 
-# Full test data
+from backend.core.effort_calculator import EffortCalculator
+from backend.core.scope_processor import ScopeDefinitionProcessor
+
 scope_inputs = [
     # DIMENSIONS
     {'name': 'Account', 'in_scope': 'YES', 'details': 2000},
@@ -112,38 +116,52 @@ user_input = {
 
 processor = ScopeDefinitionProcessor()
 scope_result = processor.process_user_input(user_input)
+
+print("\n" + "=" * 80)
+print("SCOPE DEFINITION")
+print("=" * 80)
+print(f"Total Weightage: {scope_result['total_weightage']}")
+print(f"Tier: {scope_result['tier_name']}")
+
 calc = EffortCalculator(scope_result)
+effort_estimation = calc.calculate_effort()
+summary = calc.generate_summary(effort_estimation)
 
-print(f"Total Weightage: {calc.engagement_weightage}")
+# Compare with expected
+categories_effort = {}
+for cat_name, cat_data in effort_estimation.items():
+    effort = cat_data.get('final_estimate', 0)
+    categories_effort[cat_name] = effort
 
-# Check Historical Data tasks
-print("\n\nHistorical Data tasks breakdown:")
-hist_data_tasks = EFFORT_ESTIMATION_TEMPLATE["Historical Data"]["tasks"]
-total_task_estimate = 0
-for task_name in hist_data_tasks:
-    task_estimate = calc.calculate_task_final_estimate(task_name)
-    print(f"  {task_name}: {task_estimate}")
-    total_task_estimate += task_estimate
+expected = {
+    "Project Initiation and Planning": 18.0,
+    "Creating and Managing EPM Cloud Infrastructure": 6.0,
+    "Requirement Gathering, Read back and Client Sign-off": 44.0,
+    "Design": 42.0,
+    "Build and Configure FCC": 148.0,
+    "Setup Application Features": 96.5,
+    "Application Customization": 72.0,
+    "Calculations": 126.0,
+    "Security": 24.0,
+    "Historical Data": 552.0,
+    "Integrations": 140.0,
+    "Reporting": 140.0,
+    "Automations": 64.0,
+    "Testing/Training": 244.0,
+    "Transition": 96.0,
+    "Documentations": 36.0,
+    "Change Management": 44.0,
+}
 
-print(f"\nTotal task estimates: {total_task_estimate}")
+print("\n" + "=" * 120)
+print("Category-by-category comparison (looking for 8-hour gap):")
+print("=" * 120)
 
-# Calculate category
-base = 60
-category_estimate = calc.calculate_category_final_estimate("Historical Data", base, {task: calc.calculate_task_final_estimate(task) for task in hist_data_tasks})
-print(f"Category final estimate (with tier adjustment): {category_estimate}")
-
-# Expected breakdown:
-#  F84 = 72 (base + tier adjustment)
-#  F85 = 360 (Historical Data Validation)
-#  F86 = 40 (Data Validation for Account Alt Hierarchies)
-#  F87 = 40 (Data Validation for Entity Alt Hierarchies)
-#  F88 = 40 (Historical Journal Conversion)
-#  Total = 72 + 360 + 40 + 40 + 40 = 552
-
-print(f"\n\nExpected breakdown:")
-print(f"  Category base with tier: 72")
-print(f"  Historical Data Validation: 360")
-print(f"  Data Validation for Account Alt Hierarchies: 40")
-print(f"  Data Validation for Entity Alt Hierarchies: 40")
-print(f"  Historical Journal Conversion: 40")
-print(f"  Total expected: 552")
+total_diff = 0
+for cat in sorted(categories_effort.keys()):
+    py_val = categories_effort.get(cat, 0)
+    ex_val = expected.get(cat, 0)
+    diff = ex_val - py_val
+    total_diff += diff
+    marker = "  *** SHORT ***" if diff > 0.1 else ""
+    print(f"{cat:45s} {py_val:>12.1f} {ex_val:>12.1f} {diff:>12.1f}{marker}")

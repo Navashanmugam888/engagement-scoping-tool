@@ -1,6 +1,19 @@
 """
 Effort Estimation Calculator
-Calculates effort estimation based on scope definition and tier
+
+Calculates effort estimation based on scope definition and engagement weightage.
+Implements exact formulas from Excel Effort Estimation sheet including:
+- Task-level effort calculations with specialized formulas
+- Tier-based adjustments for 16 categories
+- In-scope gating via in_scope_flag
+- Excel ROUND function implementation (round half up)
+
+Key Features:
+- Handles complex scaling formulas (ROUND-based calculations)
+- Special multipliers for specific task types
+- Conditional logic for threshold-based calculations
+- Aggregates task estimates at category level
+- Calculates summary: hours → days (÷8) → months (÷30)
 """
 
 from pathlib import Path

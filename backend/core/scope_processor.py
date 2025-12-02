@@ -1,6 +1,25 @@
 """
 Scope Definition Processor
-Handles user input, formula evaluation, and weightage calculation
+
+Processes user input and calculates engagement weightage for FCC implementation scoping.
+
+Key Responsibilities:
+1. Load metrics from Excel Scope Definition sheet (71 metrics)
+2. Process user inputs: in_scope (YES/NO) and details (numeric value)
+3. Set in_scope_flag (1/0) - critical gate for effort calculation
+4. Evaluate weightage formulas for each metric using FormulaEvaluator
+5. Calculate total engagement weightage (sum of all metric weightages)
+6. Determine implementation tier based on weightage range
+
+Critical Detail:
+- in_scope_flag = 1 when in_scope == "YES", else 0
+- Effort calculator uses in_scope_flag to gate all effort contributions
+- When flag=0, no effort is calculated regardless of details value
+
+Formula Evaluation:
+- Formulas use FeatureName[InScope] and FeatureName[Details] syntax
+- FormulaEvaluator replaces these with actual values before evaluation
+- Supports IF, AND, OR, SUM, IFS Excel functions
 """
 
 from pathlib import Path

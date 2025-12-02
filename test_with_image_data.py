@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 """
-Debug the full test calculation with our image data
+Test with actual data from FCC Implementation Scope image
+This will calculate:
+1. Final weightage using parallel formulas from formulas_expanded.csv
+2. Implementation tier
+3. Effort estimation (hours, days, months)
 """
-import sys
-sys.path.insert(0, '.')
 
-from backend.core.effort_calculator import EffortCalculator
-from backend.core.scope_processor import ScopeDefinitionProcessor
-from backend.data.effort_template import EFFORT_ESTIMATION_TEMPLATE
+import json
+from backend.scoping_engine import ScopingEngine
 
+# Sample data FROM THE IMAGE YOU PROVIDED
 scope_inputs = [
+    # DIMENSIONS
     {'name': 'Account', 'in_scope': 'YES', 'details': 2000},
     {'name': 'Account Alternate Hierarchies', 'in_scope': 'YES', 'details': 2},
     {'name': 'Rationalization of CoA', 'in_scope': 'YES', 'details': 0},
@@ -59,9 +62,9 @@ scope_inputs = [
     
     # HISTORICAL DATA
     {'name': 'Historical Data Validation', 'in_scope': 'YES', 'details': 2},
-    {'name': 'Data Validation for Account Alt Hierarchies', 'in_scope': 'YES', 'details': 0},
-    {'name': 'Data Validation for Entity Alt Hierarchies', 'in_scope': 'YES', 'details': 0},
-    {'name': 'Historical Journal Conversion', 'in_scope': 'YES', 'details': 0},
+    {'name': 'Data Validation for Account Alt Hierarchies', 'in_scope': 'YES', 'details': 2},
+    {'name': 'Data Validation for Entity Alt Hierarchies', 'in_scope': 'YES', 'details': 2},
+    {'name': 'Historical Journal Conversion', 'in_scope': 'YES', 'details': 2},
     
     # INTEGRATIONS
     {'name': 'Files Based Loads', 'in_scope': 'NO', 'details': 2},
@@ -114,24 +117,30 @@ user_input = {
     'selected_roles': ['PM USA', 'PM India', 'Architect USA']
 }
 
-processor = ScopeDefinitionProcessor()
-scope_result = processor.process_user_input(user_input)
+print("\n" + "="*80)
+print("CALCULATING SCOPING REPORT WITH IMAGE DATA")
+print("="*80)
 
-calc = EffortCalculator(scope_result)
-effort_estimation = calc.calculate_effort()
+engine = ScopingEngine()
+report = engine.run_complete_workflow(user_input, 'test_from_image.json')
 
-# Find Historical Data category
-hist_data_cat = effort_estimation.get("Historical Data", {})
-print("=" * 100)
-print("HISTORICAL DATA CATEGORY BREAKDOWN")
-print("=" * 100)
-print(f"Category base hours: {hist_data_cat.get('base_hours', 0)}")
-print(f"Category final estimate: {hist_data_cat.get('final_estimate', 0)}")
-print(f"\nTasks in category:")
-for task in hist_data_cat.get('tasks', []):
-    print(f"  {task['name']:50s}: {task['final_estimate']:7.1f} hours")
+print("\n" + "="*80)
+print("SCOPE DEFINITION RESULTS")
+print("="*80)
+scope = report['scope_definition']
+print(f"Total Weightage: {scope['total_weightage']}")
+print(f"Implementation Tier: {scope['tier']} - {scope['tier_name']}")
+print(f"Features In Scope: {scope['summary']['in_scope_count']}/{scope['summary']['total_metrics']}")
 
-task_sum = sum(t.get('final_estimate', 0) for t in hist_data_cat.get('tasks', []))
-print(f"\nSum of task estimates: {task_sum}")
-print(f"Expected total: 552")
-print(f"Gap: {552 - (hist_data_cat.get('final_estimate', 0))}")
+print("\n" + "="*80)
+print("EFFORT ESTIMATION RESULTS")
+print("="*80)
+effort = report['effort_estimation']
+summary = effort['summary']
+print(f"Total Hours: {summary['total_time_hours']}")
+print(f"Total Days: {summary['total_days']}")
+print(f"Total Months: {summary['total_months']}")
+
+print("\n" + "="*80)
+print("FULL REPORT SAVED TO: output/test_from_image.json")
+print("="*80 + "\n")
