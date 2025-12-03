@@ -9,6 +9,8 @@ from datetime import datetime
 
 from backend.core.scope_processor import ScopeDefinitionProcessor
 from backend.core.effort_calculator import EffortCalculator
+from backend.core.fte_calculator import FTEEffortsCalculator
+from backend.core.sow_report_generator import SOWReportGenerator
 from backend.config import OUTPUT_DIR
 
 
@@ -24,8 +26,10 @@ class ScopingEngine:
     
     def __init__(self):
         self.scope_processor = ScopeDefinitionProcessor()
+        self.fte_calculator = FTEEffortsCalculator()
         self.scope_result = None
         self.effort_result = None
+        self.fte_result = None
     
     def process_scope(self, user_input: dict) -> dict:
         """
@@ -87,15 +91,61 @@ class ScopingEngine:
         
         return self.effort_result
     
+    def calculate_fte_allocation(self) -> dict:
+        """
+        Calculate FTE allocation by role
+        
+        Returns:
+            FTE allocation with hours for each selected role
+        """
+        if not self.scope_result or not self.effort_result:
+            raise ValueError("Must process scope and calculate effort first")
+        
+        print("\n" + "="*80)
+        print("STEP 3: CALCULATE FTE ALLOCATION BY ROLE (SUMPRODUCT)")
+        print("="*80)
+        
+        selected_roles = self.scope_result['selected_roles']
+        effort_estimation = self.effort_result['categories']
+        
+        role_fte = self.fte_calculator.calculate_role_fte_from_effort(effort_estimation, selected_roles)
+        
+        # Convert to dict with hours, days, months
+        fte_result = {}
+        total_fte_hours = 0
+        
+        for role in selected_roles:
+            hours = role_fte.get(role, 0)
+            fte_result[role] = {
+                'hours': hours,
+                'days': hours / 8,
+                'months': (hours / 8) / 30
+            }
+            total_fte_hours += hours
+        
+        self.fte_result = {
+            'by_role': fte_result,
+            'total_hours': total_fte_hours,
+            'total_days': total_fte_hours / 8,
+            'total_months': (total_fte_hours / 8) / 30
+        }
+        
+        print(f"\n✓ FTE allocation complete")
+        print(f"  Selected Roles: {len(selected_roles)}")
+        print(f"  Total Role Hours: {total_fte_hours:.2f} hours")
+        print(f"  Average per Role: {total_fte_hours / len(selected_roles):.2f} hours")
+        
+        return self.fte_result
+    
     def generate_report(self, output_filename: str = None) -> dict:
         """
-        Generate complete scoping report
+        Generate complete scoping report (JSON + Word document)
         
         Args:
             output_filename: Optional custom filename
         
         Returns:
-            Complete report data
+            Complete report data with file paths
         """
         if not self.scope_result or not self.effort_result:
             raise ValueError("Must process scope and calculate effort before generating report")
@@ -104,6 +154,7 @@ class ScopingEngine:
         print("GENERATING REPORT")
         print("="*80)
         
+        # Generate JSON report
         report = {
             'generated_at': datetime.now().isoformat(),
             'scope_definition': {
@@ -121,19 +172,55 @@ class ScopingEngine:
             }
         }
         
-        # Save to file
+        # Add FTE allocation if available
+        if self.fte_result:
+            report['fte_allocation'] = self.fte_result
+        
+        # Save JSON report
         OUTPUT_DIR.mkdir(exist_ok=True)
         
         if not output_filename:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            output_filename = f'scoping_report_{timestamp}.json'
+            output_filename = f'scoping_report_{timestamp}'
+        else:
+            # Remove extension if provided
+            output_filename = output_filename.replace('.json', '').replace('.docx', '')
         
-        output_path = OUTPUT_DIR / output_filename
+        json_path = OUTPUT_DIR / f'{output_filename}.json'
         
-        with open(output_path, 'w') as f:
+        with open(json_path, 'w') as f:
             json.dump(report, f, indent=2)
         
-        print(f"\n✓ Report saved to: {output_path}")
+        print(f"\n[OK] JSON Report saved to: {json_path}")
+        
+        # Generate Word document report
+        sow_generator = SOWReportGenerator()
+        
+        # Prepare FTE allocation for Word doc
+        fte_for_word = {}
+        if self.fte_result:
+            for role in self.scope_result['selected_roles']:
+                if role in self.fte_result['by_role']:
+                    fte_for_word[role] = self.fte_result['by_role'][role]
+        
+        # Use timestamp to avoid file locking issues
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        docx_filename = f'{output_filename.replace(".json", "")}_{timestamp}.docx'
+        
+        docx_path = sow_generator.generate_word_document(
+            self.scope_result,
+            self.effort_result['categories'],
+            self.effort_result['summary'],
+            fte_for_word,
+            OUTPUT_DIR / docx_filename
+        )
+        
+        print(f"[OK] Word Report saved to: {docx_path}")
+        
+        report['files'] = {
+            'json_report': str(json_path),
+            'word_report': str(docx_path)
+        }
         
         return report
     
@@ -158,7 +245,10 @@ class ScopingEngine:
         # Step 2: Calculate effort
         self.calculate_effort()
         
-        # Step 3: Generate report
+        # Step 3: Calculate FTE allocation
+        self.calculate_fte_allocation()
+        
+        # Step 4: Generate report
         report = self.generate_report(output_filename)
         
         # Print summary
@@ -191,5 +281,17 @@ class ScopingEngine:
         print(f"   Selected Roles: {len(scope['selected_roles'])}")
         for role in scope['selected_roles']:
             print(f"     • {role}")
+        
+        # Print FTE allocation if available
+        if self.fte_result:
+            print(f"\n📊 FTE ALLOCATION BY ROLE")
+            print(f"   {'Role':<40} {'Hours':>12}")
+            print(f"   {'-'*54}")
+            for role in scope['selected_roles']:
+                if role in self.fte_result['by_role']:
+                    hours = self.fte_result['by_role'][role]['hours']
+                    print(f"   {role:<40} {hours:>12.2f}")
+            print(f"   {'-'*54}")
+            print(f"   {'TOTAL':<40} {self.fte_result['total_hours']:>12.2f}")
         
         print("\n" + "="*80)
