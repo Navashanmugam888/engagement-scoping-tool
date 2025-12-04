@@ -29,20 +29,27 @@ class SOWReportGenerator:
         self.ws_scope = self.wb['Scope Definition']
         self.ws_def = self.wb['Definitions']
     
-    def get_scope_details(self):
-        """Extract scope details from Scope Definition sheet"""
+    def get_scope_details(self, scope_inputs_dict):
+        """Extract scope details from user input (scope_inputs_dict)
+        
+        Args:
+            scope_inputs_dict: Dict mapping metric names to {'in_scope': str, 'details': number}
+        
+        Returns:
+            Dict with actual user input values
+        """
         details = {
-            'Account': self.ws_scope['D6'].value or 0,
-            'Account Hierarchies': self.ws_scope['D7'].value or 0,
-            'Entity': self.ws_scope['D11'].value or 0,
-            'Entity Hierarchies': self.ws_scope['D13'].value or 0,
-            'Currencies': self.ws_scope['D9'].value or 0,
-            'Reporting Currencies': self.ws_scope['D10'].value or 0,
-            'Custom Dimensions': self.ws_scope['D16'].value or 0,
-            'Custom Dimension Hierarchies': self.ws_scope['D17'].value or 0,
-            'Data Forms': self.ws_scope['D40'].value or 0,
-            'Business Rules': self.ws_scope['D44'].value or 0,
-            'Member Formulas': self.ws_scope['D45'].value or 0,
+            'Account': scope_inputs_dict.get('Account', {}).get('details', 0),
+            'Account Hierarchies': scope_inputs_dict.get('Account Alternate Hierarchies', {}).get('details', 0),
+            'Entity': scope_inputs_dict.get('Entity', {}).get('details', 0),
+            'Entity Hierarchies': scope_inputs_dict.get('Entity Alternate Hierarchies', {}).get('details', 0),
+            'Currencies': scope_inputs_dict.get('Multi-Currency', {}).get('details', 0),
+            'Reporting Currencies': scope_inputs_dict.get('Reporting Currency', {}).get('details', 0),
+            'Custom Dimensions': scope_inputs_dict.get('Custom Dimensions', {}).get('details', 0),
+            'Custom Dimension Hierarchies': scope_inputs_dict.get('Alternate Hierarchies in Custom Dimensions', {}).get('details', 0),
+            'Data Forms': scope_inputs_dict.get('Data Forms', {}).get('details', 0),
+            'Business Rules': scope_inputs_dict.get('Business Rules', {}).get('details', 0),
+            'Member Formulas': scope_inputs_dict.get('Member Formula', {}).get('details', 0),
         }
         return details
     
@@ -93,7 +100,7 @@ class SOWReportGenerator:
         
         return kdd_items
     
-    def generate_word_document(self, scope_result, effort_estimation, summary, fte_allocation, output_path=None):
+    def generate_word_document(self, scope_result, effort_estimation, summary, fte_allocation, scope_inputs_dict, output_path=None):
         """
         Generate professional SOW report as Word document
         
@@ -102,6 +109,7 @@ class SOWReportGenerator:
             effort_estimation: Output from EffortCalculator
             summary: Summary dict with total hours/days/months
             fte_allocation: Dict of role -> {'hours': value, ...}
+            scope_inputs_dict: Dict with user input scope values
             output_path: Path to save the Word document
         
         Returns:
@@ -111,7 +119,7 @@ class SOWReportGenerator:
         doc = Document()
         
         # Get data
-        scope_data = self.get_scope_details()
+        scope_data = self.get_scope_details(scope_inputs_dict)
         weightage = scope_result['total_weightage']
         tier_name = scope_result['tier_name']
         tier_range = scope_result['tier_range']

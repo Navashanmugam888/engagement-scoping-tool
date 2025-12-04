@@ -30,6 +30,7 @@ class ScopingEngine:
         self.scope_result = None
         self.effort_result = None
         self.fte_result = None
+        self.scope_inputs_dict = None
     
     def process_scope(self, user_input: dict) -> dict:
         """
@@ -50,6 +51,10 @@ class ScopingEngine:
         print("\n" + "="*80)
         print("STEP 1: PROCESSING SCOPE DEFINITION")
         print("="*80)
+        
+        # Store scope_inputs_dict for report generation
+        scope_inputs_list = user_input.get('scope_inputs', [])
+        self.scope_inputs_dict = {item['name']: item for item in scope_inputs_list}
         
         self.scope_result = self.scope_processor.process_user_input(user_input)
         
@@ -212,6 +217,7 @@ class ScopingEngine:
             self.effort_result['categories'],
             self.effort_result['summary'],
             fte_for_word,
+            self.scope_inputs_dict,
             OUTPUT_DIR / docx_filename
         )
         
