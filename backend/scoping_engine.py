@@ -208,9 +208,8 @@ class ScopingEngine:
                 if role in self.fte_result['by_role']:
                     fte_for_word[role] = self.fte_result['by_role'][role]
         
-        # Use timestamp to avoid file locking issues
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        docx_filename = f'{output_filename.replace(".json", "")}_{timestamp}.docx'
+        # Don't add extra timestamp - output_filename already has one
+        docx_filename = f'{output_filename.replace(".json", "")}.docx'
         
         docx_path = sow_generator.generate_word_document(
             self.scope_result,

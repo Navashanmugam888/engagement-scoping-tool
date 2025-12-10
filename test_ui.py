@@ -235,7 +235,7 @@ def input_scope_interactive():
         # APPLICATION CUSTOMIZATION
         ('Application Customization', None, True, 'APPLICATION CUSTOMIZATION'),
         ('Data Forms', True, False, 'Application Customization'),
-        ('Dashboards', False, False, 'Application Customization'),
+        ('Dashboards', True, False, 'Application Customization'),
         
         # CALCULATIONS
         ('Calculations', None, True, 'CALCULATIONS'),
