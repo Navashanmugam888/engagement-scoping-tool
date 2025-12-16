@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Focus: Compact and Crisp Typography */
+html, body {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  background: #fcfdfe; /* Cleaner, almost white background */
+  color: #374151; /* Dark gray for high contrast */
+  font-size: 14px; /* Reduced base size for a more compact feel */
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
+
+/* Ensure PrimeReact components use the specified font */
+.p-datatable, .p-card, .p-inputtext, .p-tabview, .p-button-label, .p-button, .p-tag {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+/* Focus: Clean Containers */
+.p-card {
+  background: #fff;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05); /* Very subtle shadow */
+  border-radius: 0.5rem; /* Standard professional radius */
+  border: 1px solid #e5e7eb !important; /* Light, thin border */
+  padding: 1.5rem !important; /* Reduced card padding */
+}
+
+.p-card .p-card-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.125rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Focus: Tighter, Aligned Table Appearance */
+.p-datatable {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.p-datatable .p-datatable-header {
+  background: #fff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 1rem 1.25rem !important; /* Reduced header padding */
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+  background: #f9fafb !important;
+  padding: 0.75rem 1.25rem !important; /* Tighter vertical padding */
+  border: none !important;
+  text-transform: uppercase; /* Professional look for headers */
+  font-size: 0.8rem;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem 1.25rem !important; /* Tighter vertical padding */
+  border-top: 1px solid #f3f4f6 !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+    background-color: #f5f7f9 !important; /* Subtle hover effect */
+}
+
+/* Focus: Muted, Compact Tags */
+.p-tag {
+  font-size: 0.75rem !important; /* Smaller tag font */
+  background: #e0f2fe !important; /* Light Blue 100 */
+  color: #0369a1 !important; /* Sky Blue 700 */
+  border: none !important;
+  border-radius: 4px !important;
+  font-weight: 500;
+  padding: 0.15rem 0.5rem !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #1f2937;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+a {
+  color: #4f46e5;
+  text-decoration: none;
+}
+a:hover { 
+  color: #3730a3; 
+  text-decoration: underline;
+}
+
+hr {
+  border-color: #e5e7eb;
+}
+
+/* Focus: Simple Button Styling */
+.p-button {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  border-radius: 0.5rem !important;
+  padding: 0.45rem 1rem !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.p-button.p-button-text {
+  color: #2563eb !important;
+}
+/* Focus: Compact Input Fields */
+.p-inputtext {
+  border-radius: 0.375rem !important;
+  border: 1px solid #d1d5db !important;
+  font-size: 0.875rem !important; /* Compact input font */
+  padding: 0.5rem 0.75rem !important; /* Reduced input padding */
+  color: #374151 !important;
+  box-shadow: none;
+}
+
+.p-inputtext:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 1px #4f46e5 !important; /* Thinner focus ring */
+}
+
+/* DataTable Alignment Rules (Critical for professionalism) */
+/* Center header text for numeric columns */
+.p-datatable .p-column-header-content {
+    justify-content: center; 
+}
+/* Left-align the first (Company Name) column header */
+.p-datatable .p-datatable-thead > tr > th:first-child .p-column-header-content {
+    justify-content: start; 
+}
+/* Center the numeric data cells */
+.p-datatable .p-datatable-tbody > tr > td {
+    text-align: center; 
+}
+/* Left-align the first (Company Name) column data cell */
+.p-datatable .p-datatable-tbody > tr > td:first-child {
+    text-align: left; 
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+/* Add these new styles to your existing globals.css */
+
+/* Custom styles for the filter panel cards */
+.p-card-filter .p-card-title {
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
+    color: #374151; /* gray-700 */
+}
+.p-card-filter .p-card-body {
+    padding: 1.25rem; /* 20px */
+}
+.p-card-filter .p-card-content {
+    padding: 0;
+}
+
+/* Custom styles for the main datatable to match the image */
+.p-datatable-customers .p-datatable-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+}
+.p-datatable-customers .p-datatable-thead > tr > th {
+    background: #F9FAFB; /* gray-50 */
+    color: #6B7280; /* gray-500 */
+    font-size: 0.75rem; /* 12px */
+    font-weight: 600;
+    text-transform: uppercase;
+    border: none;
+}
+.p-datatable-customers .p-datatable-tbody > tr > td {
+    border-color: #f3f4f6; /* gray-100 */
+}
+.p-paginator {
+    border-top: 1px solid #e5e7eb;
+}
+/* --- DEFINITIVE PRIMEREACT CHECKBOX FIX --- */
+
+/* 1. Style the UNCHECKED box */
+body .p-checkbox .p-checkbox-box {
+  border: 1px solid #ced4da; /* A standard gray border */
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* 2. Style the CHECKED box by overriding PrimeReact's CSS Variables */
+body .p-checkbox .p-checkbox-box.p-highlight {
+  /* These variables control the checked state's appearance */
+  --p-checkbox-checked-border-color: #4f46e5; /* The blue border */
+  --p-checkbox-checked-background: #4f46e5;   /* The blue background */
+}
+
+/* 3. Style the CHECKMARK icon by overriding its color variable */
+body .p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon {
+  --p-icon-color: #ffffff; /* This variable sets the icon (tick) color to white */
+}
+
+/* 4. Style the hover effect */
+body .p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
+  border-color: #4f46e5;
+}
+
+/* --- CUSTOM HTML RADIO BUTTON STYLES --- */
+
+.custom-radio-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #000000;
+  border-radius: 50%;
+  background-color: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* When checked - dark purple filled circle */
+.custom-radio-input:checked {
+  background-color: #443575;
+  border-color: #443575;
+}
+
+/* White dot in center when checked */
+.custom-radio-input:checked::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Hover effect */
+.custom-radio-input:hover {
+  border-color: #443575;
+  box-shadow: 0 0 0 3px rgba(68, 53, 117, 0.1);
+}
+
+/* Focus effect */
+.custom-radio-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(68, 53, 117, 0.2);
+}
+
+
